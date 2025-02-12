@@ -13,7 +13,7 @@ const Login = () => {
   const handleLogin = async () => {
     try {
       const res = await login({ email: email, password: password });
-      loginContext(res.data.token);
+      loginContext(res.data.token, res.data.user);
       navigate("/dashboard");
     } catch (err) {
       console.error("Login failed", err);

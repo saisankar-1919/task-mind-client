@@ -8,14 +8,14 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     if (token) {
-      setUser({ loggedIn: true });
+      setUser(user);
     }
   }, [token]);
 
-  const loginContext = (newToken) => {
+  const loginContext = (newToken, user) => {
     setToken(newToken);
     localStorage.setItem("token", newToken);
-    setUser({ loggedIn: true });
+    setUser(user);
   };
 
   const logoutContext = () => {

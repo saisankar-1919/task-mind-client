@@ -14,7 +14,7 @@ const Register = () => {
     try {
       console.log("register");
       const res = await register({ email: email, password: password });
-      loginContext(res.data.token);
+      loginContext(res.data.token, res.data.user);
       navigate("/dashboard");
     } catch (err) {
       console.error("Registration failed", err);
