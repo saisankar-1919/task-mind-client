@@ -37,8 +37,10 @@ const Dashboard = () => {
   const [open, setOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState(null);
   const { user, logoutContext } = useContext(AuthContext);
-  console.log("user", user);
   const navigate = useNavigate();
+
+  console.log("titles", title);
+  console.log("description", description);
 
   useEffect(() => {
     fetchTasks();

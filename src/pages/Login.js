@@ -31,35 +31,21 @@ const Login = () => {
   };
 
   return (
-    <Container maxWidth="sm" sx={{ mt: 8 }}>
+    <Container
+      maxWidth="sm"
+      sx={{ mt: 5, bgcolor: "#F3F4F6", p: 4, borderRadius: 3 }}
+    >
       <AppBar position="static" sx={{ bgcolor: "#4B0082", borderRadius: 2 }}>
         <Toolbar>
           <Typography variant="h5" fontWeight={600} color="white">
-            Login
+            Welcome back!
           </Typography>
         </Toolbar>
       </AppBar>
 
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          height: "80vh",
-        }}
-      >
-        <Card sx={{ p: 4, borderRadius: 3, boxShadow: 3, width: "100%" }}>
+      <Box display="flex" justifyContent="center" mt={4}>
+        <Card sx={{ width: "100%", p: 3, borderRadius: 2, boxShadow: 3 }}>
           <CardContent>
-            <Typography
-              variant="h6"
-              fontWeight={600}
-              color="text.primary"
-              textAlign="center"
-              mb={2}
-            >
-              Welcome Back!
-            </Typography>
-
             <TextField
               label="Email"
               fullWidth

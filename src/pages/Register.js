@@ -39,17 +39,9 @@ const Register = () => {
       maxWidth="sm"
       sx={{ mt: 5, bgcolor: "#F3F4F6", p: 4, borderRadius: 3 }}
     >
-      <AppBar
-        position="static"
-        sx={{ bgcolor: "#4B0082", boxShadow: 2, p: 1, borderRadius: 2 }}
-      >
+      <AppBar position="static" sx={{ bgcolor: "#4B0082", borderRadius: 2 }}>
         <Toolbar>
-          <Typography
-            variant="h5"
-            fontWeight={600}
-            color="white"
-            sx={{ mx: "auto" }}
-          >
+          <Typography variant="h5" fontWeight={600} color="white">
             Register
           </Typography>
         </Toolbar>
@@ -84,7 +76,7 @@ const Register = () => {
               }}
               onClick={handleRegister}
             >
-              Register
+              Continue
             </Button>
           </CardContent>
         </Card>

@@ -30,7 +30,8 @@ export const getAllTask = async () => {
   return response.data;
 };
 
-export const addTask = async ({ title, description }) => {
+export const addTask = async (title, description) => {
+  console.log("addTask", title, description);
   const endpoint = TASK_PATHS.addTask;
   console.log("api enpoint: ", endpoint);
   const response = await api({
