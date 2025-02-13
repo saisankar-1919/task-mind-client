@@ -37,6 +37,7 @@ const Dashboard = () => {
   const [open, setOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState(null);
   const { user, logoutContext } = useContext(AuthContext);
+  console.log("user", user);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -200,10 +201,17 @@ const Dashboard = () => {
                     p: 2,
                     borderRadius: "12px",
                     boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
+                    backgroundColor: task.completed ? "#ccffdd" : "#ffebcc",
+                    transition: "background-color 0.3s ease-in-out",
                   }}
                 >
                   <CardContent sx={{ flexGrow: 1 }}>
-                    <Typography variant="h6" fontWeight={700} color="#2D3748">
+                    <Typography
+                      variant="h6"
+                      fontWeight={700}
+                      color="#2D3748"
+                      sx={{ textTransform: "capitalize" }}
+                    >
                       {task.title}
                     </Typography>
 
@@ -229,12 +237,22 @@ const Dashboard = () => {
                   <Stack direction="row" alignItems="center">
                     <StatusChip
                       status={task.completed}
-                      onChange={async () =>
+                      onChange={async () => {
+                        const updatedStatus = !task.completed;
+
+                        setTasks((prevTasks) =>
+                          prevTasks.map((t) =>
+                            t._id === task._id
+                              ? { ...t, completed: updatedStatus }
+                              : t
+                          )
+                        );
+
                         await updateTask({
                           taskId: task._id,
-                          completed: !task.completed,
-                        })
-                      }
+                          completed: updatedStatus,
+                        });
+                      }}
                     />
 
                     <Box sx={{ flexGrow: 1 }} />
