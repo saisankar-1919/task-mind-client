@@ -2,31 +2,41 @@ import { useEffect, useState, useContext } from "react";
 import {
   Container,
   Typography,
-  TextField,
   Button,
-  List,
-  ListItem,
-  IconButton,
-  Card,
-  CardContent,
-  CardActions,
   Grid,
   AppBar,
   Toolbar,
   Chip,
   Box,
+  Tooltip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  TextField,
+  DialogActions,
+  IconButton,
+  Card,
+  CardContent,
+  Stack,
 } from "@mui/material";
-import { Delete, ExitToApp } from "@mui/icons-material";
+import { Delete, ExitToApp, Add } from "@mui/icons-material";
 import axios from "axios";
 import AuthContext from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import ModeEditIcon from "@mui/icons-material/ModeEdit";
+import StatusChip from "../components/StatusChip";
+import { addTask, getAllTask, updateTask } from "../api/task";
 
 const Dashboard = () => {
+  console.log("local storage", localStorage.getItem("token"));
+
   const [tasks, setTasks] = useState([]);
+  console.log("tasks", tasks);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [open, setOpen] = useState(false);
+  const [selectedTask, setSelectedTask] = useState(null);
   const { user, logoutContext } = useContext(AuthContext);
-  console.log("user", user);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -34,23 +44,43 @@ const Dashboard = () => {
   }, []);
 
   const fetchTasks = async () => {
-    const token = localStorage.getItem("token");
-    const res = await axios.get("http://localhost:3000/api/task", {
-      headers: { Authorization: token },
-    });
-    setTasks(res.data);
+    const res = await getAllTask();
+    setTasks(res);
   };
 
-  const addTask = async () => {
-    if (!title.trim() || !description.trim()) return;
-    const token = localStorage.getItem("token");
-    await axios.post(
-      "http://localhost:3000/api/task",
-      { title, description },
-      { headers: { Authorization: token } }
-    );
+  const openDialog = (task = null) => {
+    setSelectedTask(task);
+    setTitle(task ? task.title : "");
+    setDescription(task ? task.description : "");
+    setOpen(true);
+  };
+
+  const handleTaskSubmit = async () => {
+    if (selectedTask) {
+      try {
+        const updatedFields = {};
+        if (title !== selectedTask.title) updatedFields.title = title;
+        if (description !== selectedTask.description)
+          updatedFields.description = description;
+
+        if (Object.keys(updatedFields).length > 0) {
+          await updateTask({ taskId: selectedTask._id, ...updatedFields });
+        }
+      } catch (e) {
+        console.log(e);
+      }
+    } else {
+      try {
+        await addTask(title, description);
+      } catch (e) {
+        console.log(e);
+      }
+    }
+
     setTitle("");
     setDescription("");
+    setOpen(false);
+    setSelectedTask(null);
     fetchTasks();
   };
 
@@ -77,7 +107,6 @@ const Dashboard = () => {
           </Typography>
           <Box sx={{ display: "flex", alignItems: "center" }}>
             <Chip
-              //label={user.email}
               sx={{
                 mr: 2,
                 fontSize: "1rem",
@@ -86,7 +115,6 @@ const Dashboard = () => {
                 color: "#4B0082",
               }}
             />
-
             <IconButton
               sx={{
                 bgcolor: "rgba(255, 215, 0, 0.2)",
@@ -106,105 +134,140 @@ const Dashboard = () => {
         </Toolbar>
       </AppBar>
 
-      <Card
-        sx={{
-          p: 3,
-          mt: 3,
-          mb: 3,
-          bgcolor: "white",
-          borderRadius: 3,
-          boxShadow: "0px 8px 16px rgba(0, 0, 0, 0.15)",
-        }}
-      >
-        <Typography variant="h6" fontWeight={600} color="#4B0082" gutterBottom>
-          Add a New Task
-        </Typography>
-        <TextField
-          label="Title*"
-          fullWidth
-          margin="dense"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-        />
-        <TextField
-          label="Description*"
-          fullWidth
-          margin="dense"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          multiline
-          rows={4}
-          variant="outlined"
-        />
+      <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 3 }}>
+        <Button
+          variant="contained"
+          sx={{ bgcolor: "#4B0082", color: "white", fontWeight: "bold" }}
+          startIcon={<Add />}
+          onClick={() => openDialog(null)}
+        >
+          Add Task
+        </Button>
+      </Box>
 
-        <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}>
+      <Dialog open={open} onClose={() => setOpen(false)}>
+        <DialogTitle>
+          {selectedTask ? "Edit Task" : "Add a New Task"}
+        </DialogTitle>
+        <DialogContent>
+          <TextField
+            label="Title*"
+            fullWidth
+            margin="dense"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+          />
+          <TextField
+            label="Description*"
+            fullWidth
+            margin="dense"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            multiline
+            rows={4}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpen(false)}>Cancel</Button>
           <Button
+            onClick={handleTaskSubmit}
+            disabled={!title || !description}
             variant="contained"
-            size="small"
-            sx={{
-              bgcolor: "#4B0082",
-              color: "white",
-              fontWeight: "bold",
-              borderRadius: "8px",
-              textTransform: "none",
-              px: 3,
-              py: 1,
-              "&:hover": { bgcolor: "#660099" },
-            }}
-            disabled={title == "" || description == ""}
-            onClick={addTask}
           >
-            Add Task
+            {selectedTask ? "Update Task" : "Add Task"}
           </Button>
-        </Box>
-      </Card>
+        </DialogActions>
+      </Dialog>
 
-      <Typography
-        variant="h6"
-        sx={{ mt: 3, mb: 2, color: "#4B0082", fontWeight: 600 }}
-      >
-        Your Tasks
-      </Typography>
-      <Grid container spacing={2}>
-        {tasks.map((task) => (
-          <Grid item xs={12} sm={6} md={4} key={task._id}>
-            <Card
-              sx={{
-                position: "relative",
-                boxShadow: "0px 6px 12px rgba(0, 0, 0, 0.15)",
-                borderRadius: 3,
-                transition: "0.3s",
-                "&:hover": { transform: "scale(1.02)" },
-              }}
-            >
-              <CardContent>
-                <Typography variant="h6" fontWeight={600} color="#4B0082">
-                  {task.title}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {task.description}
-                </Typography>
-              </CardContent>
-              <CardActions sx={{ justifyContent: "flex-end" }}>
-                <IconButton
-                  color="error"
-                  onClick={() => deleteTask(task._id)}
+      {tasks?.length > 0 ? (
+        <Box>
+          <Typography
+            variant="h6"
+            sx={{ mt: 3, mb: 2, color: "#4B0082", fontWeight: 600 }}
+          >
+            Your Tasks
+          </Typography>
+
+          <Grid container spacing={3}>
+            {tasks.map((task) => (
+              <Grid item xs={12} sm={6} md={4} key={task._id}>
+                <Card
                   sx={{
-                    position: "absolute",
-                    top: 8,
-                    right: 8,
-                    bgcolor: "rgba(255,0,0,0.1)",
-                    borderRadius: "50%",
-                    "&:hover": { bgcolor: "rgba(255,0,0,0.2)" },
+                    height: 220,
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "space-between",
+                    p: 2,
+                    borderRadius: "12px",
+                    boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
                   }}
                 >
-                  <Delete />
-                </IconButton>
-              </CardActions>
-            </Card>
+                  <CardContent sx={{ flexGrow: 1 }}>
+                    <Typography variant="h6" fontWeight={700} color="#2D3748">
+                      {task.title}
+                    </Typography>
+
+                    <Tooltip title={task.description} arrow>
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        sx={{
+                          mt: 1,
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          display: "-webkit-box",
+                          WebkitLineClamp: 3,
+                          WebkitBoxOrient: "vertical",
+                          maxHeight: "80px",
+                        }}
+                      >
+                        {task.description}
+                      </Typography>
+                    </Tooltip>
+                  </CardContent>
+
+                  <Stack direction="row" alignItems="center">
+                    <StatusChip
+                      status={task.completed}
+                      onChange={async () =>
+                        await updateTask({
+                          taskId: task._id,
+                          completed: !task.completed,
+                        })
+                      }
+                    />
+
+                    <Box sx={{ flexGrow: 1 }} />
+
+                    <IconButton onClick={() => openDialog(task)}>
+                      <ModeEditIcon sx={{ fontSize: 28, color: "#4B0082" }} />
+                    </IconButton>
+                    <IconButton
+                      color="error"
+                      onClick={() => deleteTask(task._id)}
+                    >
+                      <Delete sx={{ fontSize: 28 }} />
+                    </IconButton>
+                  </Stack>
+                </Card>
+              </Grid>
+            ))}
           </Grid>
-        ))}
-      </Grid>
+        </Box>
+      ) : (
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            height: "50vh",
+          }}
+        >
+          <Typography variant="h6" fontWeight={600} color="text.secondary">
+            No Tasks Added
+          </Typography>
+        </Box>
+      )}
     </Container>
   );
 };
