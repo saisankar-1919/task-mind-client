@@ -26,20 +26,16 @@ export const getAllTask = async () => {
     method: endpoint.method,
     url: endpoint.path,
   });
-  console.log("response", response);
   return response.data;
 };
 
 export const addTask = async (title, description) => {
-  console.log("addTask", title, description);
   const endpoint = TASK_PATHS.addTask;
-  console.log("api enpoint: ", endpoint);
   const response = await api({
     method: endpoint.method,
     url: endpoint.path,
     data: { title, description },
   });
-  console.log("api response: ", response);
   return response.data;
 };
 
@@ -59,18 +55,15 @@ export const updateTask = async (taskData) => {
     data,
   });
 
-  console.log("API response: ", response);
   return response.data;
 };
 
 export const deleteTask = async ({ taskId }) => {
   const endpoint = TASK_PATHS.deleteTask;
-  console.log("api enpoint: ", endpoint);
   const response = await api({
     method: endpoint.method,
     url: endpoint.path,
     params: { taskId },
   });
-  console.log("api response: ", response);
   return response.data;
 };

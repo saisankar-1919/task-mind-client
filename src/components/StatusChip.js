@@ -3,7 +3,6 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
 
 const StatusChip = ({ status, onChange }) => {
-  console.log("status: ", status);
   return (
     <Chip
       label={

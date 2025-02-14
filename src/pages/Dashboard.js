@@ -28,19 +28,14 @@ import StatusChip from "../components/StatusChip";
 import { addTask, getAllTask, updateTask } from "../api/task";
 
 const Dashboard = () => {
-  console.log("local storage", localStorage.getItem("token"));
-
   const [tasks, setTasks] = useState([]);
-  console.log("tasks", tasks);
+
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [open, setOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState(null);
   const { user, logoutContext } = useContext(AuthContext);
   const navigate = useNavigate();
-
-  console.log("titles", title);
-  console.log("description", description);
 
   useEffect(() => {
     fetchTasks();
@@ -110,6 +105,7 @@ const Dashboard = () => {
           </Typography>
           <Box sx={{ display: "flex", alignItems: "center" }}>
             <Chip
+              label={user.email.split("@")[0]}
               sx={{
                 mr: 2,
                 fontSize: "1rem",

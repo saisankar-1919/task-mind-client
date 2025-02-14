@@ -1,10 +1,16 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import ProtectedRoute from "./routerProtector/ProtectedRoutes";
 import PublicRoute from "./routerProtector/PublicRoutes";
+import PageNotFound from "./pages/PageNotFound";
 
 function App() {
   return (
@@ -27,7 +33,6 @@ function App() {
               </PublicRoute>
             }
           />
-
           <Route
             path="/dashboard"
             element={
@@ -36,6 +41,9 @@ function App() {
               </ProtectedRoute>
             }
           />
+
+          <Route path="/" element={<Navigate to="/login" replace />} />
+          <Route path="*" element={<PageNotFound />} />
         </Routes>
       </Router>
     </AuthProvider>
