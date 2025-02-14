@@ -1,4 +1,4 @@
-import { useEffect, useState, useContext } from "react";
+import { useEffect, useState, useContext, useRef } from "react";
 import {
   Container,
   Typography,
@@ -20,16 +20,15 @@ import {
   Stack,
 } from "@mui/material";
 import { Delete, ExitToApp, Add } from "@mui/icons-material";
-import axios from "axios";
 import AuthContext from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import ModeEditIcon from "@mui/icons-material/ModeEdit";
 import StatusChip from "../components/StatusChip";
-import { addTask, getAllTask, updateTask } from "../api/task";
+import { deleteTask, getAllTask, updateTask } from "../api/task";
+import { handleTaskSubmit } from "./utils";
 
 const Dashboard = () => {
   const [tasks, setTasks] = useState([]);
-
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [open, setOpen] = useState(false);
@@ -37,15 +36,31 @@ const Dashboard = () => {
   const { user, logoutContext } = useContext(AuthContext);
   const navigate = useNavigate();
 
+  const isFetching = useRef(false);
+  const controller = new AbortController();
+  const signal = controller.signal;
+
   useEffect(() => {
     fetchTasks();
+
+    return () => controller.abort();
   }, []);
 
   const fetchTasks = async () => {
-    const res = await getAllTask();
-    setTasks(res);
-  };
+    if (isFetching.current) return;
+    isFetching.current = true;
 
+    try {
+      const res = await getAllTask({ signal });
+      setTasks(res);
+    } catch (error) {
+      if (error.name !== "AbortError") {
+        console.error("Failed to fetch tasks:", error);
+      }
+    } finally {
+      isFetching.current = false;
+    }
+  };
   const openDialog = (task = null) => {
     setSelectedTask(task);
     setTitle(task ? task.title : "");
@@ -53,40 +68,21 @@ const Dashboard = () => {
     setOpen(true);
   };
 
-  const handleTaskSubmit = async () => {
-    if (selectedTask) {
-      try {
-        const updatedFields = {};
-        if (title !== selectedTask.title) updatedFields.title = title;
-        if (description !== selectedTask.description)
-          updatedFields.description = description;
-
-        if (Object.keys(updatedFields).length > 0) {
-          await updateTask({ taskId: selectedTask._id, ...updatedFields });
-        }
-      } catch (e) {
-        console.log(e);
-      }
-    } else {
-      try {
-        await addTask(title, description);
-      } catch (e) {
-        console.log(e);
-      }
-    }
-
-    setTitle("");
-    setDescription("");
-    setOpen(false);
-    setSelectedTask(null);
-    fetchTasks();
+  const handleSubmit = () => {
+    handleTaskSubmit({
+      title,
+      description,
+      selectedTask,
+      setTitle,
+      setDescription,
+      setOpen,
+      setSelectedTask,
+      fetchTasks,
+    });
   };
 
-  const deleteTask = async (id) => {
-    const token = localStorage.getItem("token");
-    await axios.delete(`http://localhost:3000/api/task/${id}`, {
-      headers: { Authorization: token },
-    });
+  const deleteTaskHandler = async (id) => {
+    await deleteTask(id);
     fetchTasks();
   };
 
@@ -154,14 +150,14 @@ const Dashboard = () => {
             fullWidth
             margin="dense"
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            onChange={(e) => setTitle(e.target.value.trimStart())} // Prevent leading spaces
           />
           <TextField
             label="Description*"
             fullWidth
             margin="dense"
             value={description}
-            onChange={(e) => setDescription(e.target.value)}
+            onChange={(e) => setDescription(e.target.value.trimStart())} // Prevent leading spaces
             multiline
             rows={4}
           />
@@ -169,8 +165,8 @@ const Dashboard = () => {
         <DialogActions>
           <Button onClick={() => setOpen(false)}>Cancel</Button>
           <Button
-            onClick={handleTaskSubmit}
-            disabled={!title || !description}
+            onClick={handleSubmit}
+            disabled={!title.trim() || !description.trim()} // Disable button for empty/space-only input
             variant="contained"
           >
             {selectedTask ? "Update Task" : "Add Task"}
@@ -237,7 +233,6 @@ const Dashboard = () => {
                       status={task.completed}
                       onChange={async () => {
                         const updatedStatus = !task.completed;
-
                         setTasks((prevTasks) =>
                           prevTasks.map((t) =>
                             t._id === task._id
@@ -245,22 +240,19 @@ const Dashboard = () => {
                               : t
                           )
                         );
-
                         await updateTask({
                           taskId: task._id,
                           completed: updatedStatus,
                         });
                       }}
                     />
-
                     <Box sx={{ flexGrow: 1 }} />
-
                     <IconButton onClick={() => openDialog(task)}>
                       <ModeEditIcon sx={{ fontSize: 28, color: "#4B0082" }} />
                     </IconButton>
                     <IconButton
                       color="error"
-                      onClick={() => deleteTask(task._id)}
+                      onClick={() => deleteTaskHandler(task._id)}
                     >
                       <Delete sx={{ fontSize: 28 }} />
                     </IconButton>

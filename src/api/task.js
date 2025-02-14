@@ -58,12 +58,11 @@ export const updateTask = async (taskData) => {
   return response.data;
 };
 
-export const deleteTask = async ({ taskId }) => {
+export const deleteTask = async (taskId) => {
   const endpoint = TASK_PATHS.deleteTask;
   const response = await api({
     method: endpoint.method,
-    url: endpoint.path,
-    params: { taskId },
+    url: `${endpoint.path}${taskId}`,
   });
   return response.data;
 };
