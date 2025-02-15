@@ -1,70 +1,230 @@
-# Getting Started with Create React App
+# Project Name
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## Overview
 
-## Available Scripts
+Client a task management system that allows users to create, retrieve, update, and delete tasks. It is built using react.js wit material ui.
 
-In the project directory, you can run:
+## Features
 
-### `npm start`
+- User authentication and authorization
+- Task creation, retrieval, update, and deletion
+- Secure API with JWT authentication
+- Data validation and error handling
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## Technologies Used
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+- Node.js
+- Express.js
+- MongoDB (Mongoose ODM)
+- JWT Authentication
+- Async/Await with error handling middleware
 
-### `npm test`
+## Setup Instructions
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### Prerequisites
 
-### `npm run build`
+- Node installed
+- MongoDB installed and running locally or a MongoDB Atlas account
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### Installation
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+1. Clone the repository:
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+   ```sh
+   git clone https://github.com/saisankar-1919/task-mind-client
+   cd your-repo
+   ```
 
-### `npm run eject`
+2. Install dependencies:
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+   ```sh
+   npm install
+   ```
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+3. Create a `.env` file in the root directory and add the following variables:
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+   ```env
+   API_BASE_URL=<your_localhost_url>
+   ```
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+4. Start the server:
 
-## Learn More
+   ```sh
+   npm start
+   ```
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## API Documentation
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+### Authentication
 
-### Code Splitting
+#### Register User
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+**POST** `/api/auth/register`
 
-### Analyzing the Bundle Size
+**Request Body:**
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+```json
+{
+  "email": "john@example.com",
+  "password": "password123"
+}
+```
 
-### Making a Progressive Web App
+**Response:**
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+```json
+{
+  "message": "success message",
+  "token": "auth_token",
+  "user": {
+    "id": "user_id",
+    "email": "user_email"
+  }
+}
+```
 
-### Advanced Configuration
+#### Login User
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+**POST** `/api/auth/login`
 
-### Deployment
+**Request Body:**
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+```json
+{
+  "email": "john@example.com",
+  "password": "password123"
+}
+```
 
-### `npm run build` fails to minify
+**Response:**
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+```json
+{
+  "message": "success message",
+  "data": {
+    "token": "auth_token",
+    "user": {
+      "id": "user_id",
+      "email": "user_email"
+    }
+  }
+}
+```
+
+### Tasks
+
+#### Get All Tasks
+
+**GET** `/api/tasks`
+
+**Headers:**
+
+```json
+{
+  "Authorization": "jwt-token"
+}
+```
+
+**Response:**
+
+```json
+[
+  {
+        "_id": "task_id",
+        "title": "task title",
+        "description": "task description",
+        "completed": true/false,
+        "user_id": "user_id",
+        "__v": 0
+    },
+]
+```
+
+#### Create Task
+
+**POST** `/api/tasks`
+
+**Headers:**
+
+```json
+{
+  "Authorization": "jwt-token"
+}
+```
+
+**Request Body:**
+
+```json
+{
+  "title": "New Task",
+  "description": "Task description"
+}
+```
+
+**Response:**
+
+```json
+{
+  "_id": "taskId",
+  "title": "New Task",
+  "description": "Task description",
+  "status": "pending",
+  "createdAt": "2024-01-01T12:00:00.000Z"
+}
+```
+
+#### Update Task
+
+**PUT** `/api/tasks/:id`
+
+**Headers:**
+
+```json
+{
+  "Authorization": "jwt-token"
+}
+```
+
+**Request Body:**
+
+```json
+{
+  "status": "completed"
+}
+```
+
+**Response:**
+
+```json
+{
+  "_id": "taskId",
+  "title": "New Task",
+  "description": "Task description",
+  "status": "completed",
+  "updatedAt": "2024-01-01T13:00:00.000Z"
+}
+```
+
+#### Delete Task
+
+**DELETE** `/api/tasks/:id`
+
+**Headers:**
+
+```json
+{
+  "Authorization": "jwt-token"
+}
+```
+
+**Response:**
+
+```json
+{
+  "message": "Task deleted successfully"
+}
+```
+
+## License
+
+This project is licensed under the MIT License.
