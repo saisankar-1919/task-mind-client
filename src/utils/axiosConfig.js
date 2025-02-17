@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: process.env.API_BASE_URL || "http://localhost:3001/",
+  baseURL: process.env.API_BASE_URL || "https://task-mind-server.onrender.com/",
   headers: {
     "Content-Type": "application/json",
   },
